@@ -41,6 +41,7 @@ class _RootScaffoldState extends State<RootScaffold> {
     TextSearchPage(),
     OverlaysPage(),
     StructurePage(),
+    ChipsDemoApp()
   ];
 
   @override
@@ -51,6 +52,7 @@ class _RootScaffoldState extends State<RootScaffold> {
       NavigationDestination(icon: Icon(Icons.search_outlined), selectedIcon: Icon(Icons.search), label: 'Text & Search'),
       NavigationDestination(icon: Icon(Icons.layers_outlined), selectedIcon: Icon(Icons.layers), label: 'Overlays'),
       NavigationDestination(icon: Icon(Icons.view_agenda_outlined), selectedIcon: Icon(Icons.view_agenda), label: 'Structure'),
+      NavigationDestination(icon: Icon(Icons.padding_outlined), selectedIcon: Icon(Icons.padding_rounded), label: 'Chips'),
     ];
 
     final rail = NavigationRail(
@@ -796,4 +798,157 @@ class _Section extends StatelessWidget {
 
 void _snack(BuildContext context, String msg) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+}
+class ChipsDemoApp extends StatelessWidget {
+  const ChipsDemoApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Chips Demo (M3)',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: const Color(0xFF6750A4),
+      ),
+      home: const ChipsScreen(),
+    );
+  }
+}
+
+class ChipsScreen extends StatefulWidget {
+  const ChipsScreen({super.key});
+
+  @override
+  State<ChipsScreen> createState() => _ChipsScreenState();
+}
+
+class _ChipsScreenState extends State<ChipsScreen> {
+  // --- FilterChip (multi-select) state
+  final List<String> _allFilters = ['Phones', 'Laptops', 'Clothes', 'Accessories'];
+  final Set<String> _selectedFilters = {'Phones'};
+
+  // --- ChoiceChip (single-select) state
+  final List<String> _choices = ['All', 'Popular', 'New'];
+  String _selectedChoice = 'All';
+
+  // --- InputChip (tokens) state
+  final List<String> _people = ['Alaa', 'Noura', 'Omar'];
+  final Set<String> _selectedPeople = {'Alaa'};
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Chips Examples')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          _section(
+            context,
+            title: 'ActionChip',
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ActionChip(
+                  avatar: const Icon(Icons.refresh, size: 18),
+                  label: const Text('Refresh'),
+                  onPressed: () => _snack(context, 'ActionChip: Refresh'),
+                ),
+                ActionChip(
+                  avatar: const Icon(Icons.download, size: 18),
+                  label: const Text('Download'),
+                  onPressed: () => _snack(context, 'ActionChip: Download'),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          _section(
+            context,
+            title: 'FilterChip (multi-select)',
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final tag in _allFilters)
+                  FilterChip(
+                    label: Text(tag),
+                    selected: _selectedFilters.contains(tag),
+                    onSelected: (isSel) => setState(() {
+                      if (isSel) {
+                        _selectedFilters.add(tag);
+                      } else {
+                        _selectedFilters.remove(tag);
+                      }
+                    }),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          _section(
+            context,
+            title: 'ChoiceChip (single-select)',
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final c in _choices)
+                  ChoiceChip(
+                    label: Text(c),
+                    selected: _selectedChoice == c,
+                    onSelected: (_) => setState(() => _selectedChoice = c),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          _section(
+            context,
+            title: 'InputChip (tokens)',
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final p in _people)
+                  _selectedPeople.contains(p)
+                      ? InputChip(
+                    avatar: const CircleAvatar(child: Icon(Icons.person, size: 16)),
+                    label: Text(p),
+                    selected: true,
+                    onSelected: (_) {},
+                    onDeleted: () => setState(() => _selectedPeople.remove(p)),
+                  )
+                      : InputChip(
+                    avatar: const CircleAvatar(child: Icon(Icons.person_outline, size: 16)),
+                    label: Text(p),
+                    selected: false,
+                    onSelected: (_) => setState(() => _selectedPeople.add(p)),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Widget _section(BuildContext context, {required String title, required Widget child}) {
+    return Card(
+      elevation: 0,
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 12),
+            child,
+          ],
+        ),
+      ),
+    );
+  }
 }
